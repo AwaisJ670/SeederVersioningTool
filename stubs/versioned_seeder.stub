@@ -1,0 +1,14 @@
+<?php
+
+namespace DummyNamespace;
+
+use CodeBider\VersionSeeder\Console\VersionedSeeder;
+use Illuminate\Database\Seeder;
+
+class DummySeeder extends VersionedSeeder
+{
+    public function run()
+    {
+        // Add your seeding logic here
+    }
+}

@@ -1,0 +1,36 @@
+{
+    "name": "codebider/seeder-versioning-tool",
+    "description": "A Laravel package to versioning the seeders using an Artisan command.",
+    "keywords": ["laravel", "seeder", "artisan", "generator","migration"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Awais Javaid",
+            "email": "info.awaisjavaid@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.3",
+        "illuminate/support": "^8.0 || ^9.0 || ^10.0 || ^11.0 || ^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "CodeBider\\VersionSeeder\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "CodeBider\\VersionSeeder\\VersionSeederServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi"
+        ]
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

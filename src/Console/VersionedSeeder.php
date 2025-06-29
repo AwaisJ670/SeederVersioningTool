@@ -48,5 +48,28 @@ abstract class VersionedSeeder extends Seeder
     {
         return DB::connection(static::$connectionName)->table(static::$table)->max('batch') + 1;
     }
+
+    /**
+     * Run a list of sub-seeders only if not already seeded.
+     *
+     * @param array $subSeeders
+     * @param string|null $moduleName
+     * @return void
+     */
+    protected function runSubSeeders(array $subSeeders, string $moduleName = null)
+    {
+        $batch = self::getNextBatchNumber();
+
+        foreach ($subSeeders as $seederClass) {
+            if (!self::hasRun($seederClass)) {
+                $this->call($seederClass);
+                self::markAsRun($seederClass, $batch, $moduleName);
+
+                if ($this->command) {
+                    $this->command->info("Seeded: {$seederClass}");
+                }
+            }
+        }
+    }
 }
 

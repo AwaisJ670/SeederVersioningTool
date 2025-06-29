@@ -9,7 +9,7 @@ use CodeBider\VersionSeeder\Console\VersionedSeeder;
 
 class SeederVersioned extends Command
 {
-    protected $signature = 'db:seed:versioned
+     protected $signature = 'db:seed:versioned
                             {--connection= : Database connection name}
                             {--database= : Specific database name}
                             {--module= : Specific module to seed}';
@@ -41,6 +41,9 @@ class SeederVersioned extends Command
         $batch = VersionedSeeder::getNextBatchNumber();
         $seederClasses = [];
 
+        $defaultSeederClass = null;
+        $defaultSeederTime = null;
+
         foreach ($files as $file) {
             $fileName = pathinfo($file->getFilename(), PATHINFO_FILENAME);
             $className = $this->buildSeederClassName($fileName, $module);
@@ -57,21 +60,37 @@ class SeederVersioned extends Command
             $seeder = new $className;
 
             if (!$seeder->hasRun($className)) {
-                $seederClasses[$className] = $file->getCTime();
+                if ($fileName === 'DefaultSeeder') {
+                    $defaultSeederClass = $className;
+                    $defaultSeederTime = $file->getCTime();
+                } else {
+                    $seederClasses[$className] = $file->getCTime();
+                }
             }
         }
 
-        // Sort by file creation time (chronological)
+        // Sort remaining seeders by file creation time
         asort($seederClasses);
 
-        foreach ($seederClasses as $class => $time) {
-            $this->callSilent('db:seed', ['--class' => $class]);
-            VersionedSeeder::markAsRun($class, $batch, $module);
-            $this->info("Seeded: {$class}");
+        // Run DefaultSeeder first if it exists
+        if ($defaultSeederClass) {
+            $this->callSilent('db:seed', ['--class' => $defaultSeederClass]);
+            VersionedSeeder::markAsRun($defaultSeederClass, $batch, $module);
+            $this->info("Seeded: {$defaultSeederClass}");
         }
+        else{
+            // Run all other seeders
+            foreach ($seederClasses as $class => $time) {
+                $this->callSilent('db:seed', ['--class' => $class]);
+                VersionedSeeder::markAsRun($class, $batch, $module);
+                $this->info("Seeded: {$class}");
+            }
+        }
+
 
         $this->info('All versioned seeders completed.');
     }
+
 
     private function getSafeModuleName(): ?string
     {
